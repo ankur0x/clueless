@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clueless AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 45%, #7e22ce 100%);
+            color: #f5f3ff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            letter-spacing: 0.02em;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        button:active { transform: scale(0.97); }
+
+        #start-session {
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            color: white;
+        }
+        #start-session:hover { opacity: 0.9; }
+
+        #stop-session {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e9d5ff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        #stop-session:hover { background: rgba(255, 255, 255, 0.14); }
+
+        #status {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #c4b5fd;
+            letter-spacing: 0.03em;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Be Clueless</h1>
+
+        <button id="start-session">Start Session</button>
+        <button id="stop-session">Stop Session</button>
+
+        <p id="status">Idle</p>
+    </div>
+
+    <script>
+        const startButton = document.getElementById("start-session");
+        const stopButton = document.getElementById("stop-session");
+        const status = document.getElementById("status");
+        
+
+        async function checkSessionState() {
+            const state = await window.app.getSessionState();
+
+            if (state.active) {
+                status.textContent = "Session is active";
+            } else {
+                status.textContent = "Session is stopped";
+            }
+        }
+
+        checkSessionState();
+
+        async function updateSessionStatus() {
+            const state = await window.app.getSessionState();
+
+            status.textContent = state.active
+                ? "Session is active"
+                : "Session is stopped";
+        }
+
+        startButton.addEventListener("click", async () => {
+            await window.app.startSession();
+            await updateSessionStatus();
+        });
+
+        stopButton.addEventListener("click", async () => {
+            await window.app.stopSession();
+            await updateSessionStatus();
+        });
+
+        updateSessionStatus();
+    </script>
+</body>
+</html>

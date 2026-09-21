@@ -1,0 +1,21 @@
+{
+  "name": "clueless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^44.4.3"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.1",
+    "groq-sdk": "^1.6.0",
+    "openai": "^7.20.0"
+  }
+}
