@@ -17,16 +17,6 @@ app.whenReady().then(() => {
     chatManager = new ChatManager();
     aiManager = new AIManager();
 
-    console.log("Current provider:", aiManager.getProvider());
-
-    aiManager.setProvider("gemini");
-
-    console.log("Switched provider:", aiManager.getProvider());
-
-    aiManager.setProvider("groq");
-
-    console.log("Switched back:", aiManager.getProvider());
-
     // MAIN WINDOW //
     windowManager.createMainWindow();
     
@@ -34,6 +24,7 @@ app.whenReady().then(() => {
     ipcMain.handle("session:start", async () => {
         console.log("Session start requested");
 
+        chatManager.clearMessages();
         sessionManager.start();
 
         // CHAT WINDOW //
@@ -76,20 +67,44 @@ app.whenReady().then(() => {
             };
         }
 
-        chatManager.addMessage("user", message);
+        try {
+            chatManager.addMessage("user", message);
 
-        const response = await aiManager.generateResponse(
-            chatManager.getMessages()
-        );
+            const response = await aiManager.generateResponse(
+                chatManager.getMessages()
+            );
 
-        chatManager.addAssistantMessage(response);
+            chatManager.addAssistantMessage(response);
 
-        console.log("Messages:", chatManager.getMessages());
+            return {
+                success: true,
+                message: response
+            };
 
-        return {
-            success: true,
-            message: response
-        };
+        } catch (error) {
+            console.error("AI response error:", error);
+
+            let userMessage = "Something went wrong. Please try again.";
+
+            if (error.status === 429) {
+                userMessage =
+                    "API quota exceeded. Please try again later or switch to another provider.";
+            } else if (error.status === 503) {
+                userMessage =
+                    "AI service is temporarily overloaded. Please try again shortly.";
+            } else if (error.status === 401 || error.status === 403) {
+                userMessage =
+                    "API authentication failed. Please check your API configuration.";
+            } else if (error.status >= 500) {
+                userMessage =
+                    "AI provider is experiencing a server error. Please try again.";
+            }
+
+            return {
+                success: false,
+                message: userMessage
+            };
+        }
     });
 
     // GET MESSAGES //
@@ -99,11 +114,11 @@ app.whenReady().then(() => {
 
     ipcMain.handle("ai:set-provider", async (event, providerName) => {
         try {
-            aiManager.setProvider(providerName);
+            const result = await aiManager.setProvider(providerName);
 
             return {
                 success: true,
-                provider: aiManager.getProvider()
+                ...result
             };
         } catch (error) {
             return {
@@ -127,11 +142,11 @@ app.whenReady().then(() => {
 
     ipcMain.handle("ai:set-model", async (event, modelName) => {
         try {
-            aiManager.setModel(modelName);
+            const result = await aiManager.setModel(modelName);
 
             return {
                 success: true,
-                model: aiManager.getModel()
+                ...result
             };
         } catch (error) {
             return {
@@ -149,6 +164,24 @@ app.whenReady().then(() => {
         return {
             models: models
         };
+    });
+
+    ipcMain.handle("ai:refresh-models", async () => {
+        try {
+            const models = await aiManager.refreshModels();
+
+            return {
+                success: true,
+                models
+            };
+        } catch (error) {
+            console.error("Model refresh error:", error);
+
+            return {
+                success: false,
+                message: error.message
+            };
+        }
     });
 
 

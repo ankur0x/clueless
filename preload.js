@@ -36,4 +36,8 @@ contextBridge.exposeInMainWorld("app", {
     getAIModels: () => {
         return ipcRenderer.invoke("ai:get-models");
     },
+
+    refreshAIModels: () => {
+        return ipcRenderer.invoke("ai:refresh-models");
+    },
 });

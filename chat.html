@@ -128,12 +128,17 @@
                     <option value="groq">Groq</option>
                     <option value="gemini">Gemini</option>
                 </select>
+
             </label>
 
             <label>
                 Model
                 <select id="model-select"></select>
             </label>
+
+            <button id="refresh-models">
+                    Refresh Models
+            </button>
         </div>
 
         <div id="messages"></div>
@@ -158,6 +163,8 @@
 
         const providerSelect = document.getElementById("provider-select");
         const modelSelect = document.getElementById("model-select");
+
+        const refreshModelsButton = document.getElementById("refresh-models");
 
         async function loadAISettings() {
             const providerResult = await window.app.getAIProvider();
@@ -202,9 +209,7 @@
 
             await loadModels();
 
-            const modelResult = await window.app.getAIModel();
-
-            modelSelect.value = modelResult.model;
+            modelSelect.value = result.model;
         });
 
         modelSelect.addEventListener("change", async () => {
@@ -233,7 +238,23 @@
                 messageElement.textContent = message.content;
 
                 messagesContainer.appendChild(messageElement);
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
+        }
+
+
+        function addMessage(role, content) {
+            const messageElement = document.createElement("div");
+
+            messageElement.classList.add("message");
+            messageElement.classList.add(role);
+
+            messageElement.textContent = content;
+
+            messagesContainer.appendChild(messageElement);
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         async function loadMessages() {
@@ -249,14 +270,27 @@
                 return;
             }
 
-            const result = await window.app.sendMessage(message);
+            sendButton.disabled = true;
+            sendButton.textContent = "Sending...";
 
-            if (result.success) {
+            try {
+                addMessage("user", message);
                 messageInput.value = "";
-            }
 
-            await loadMessages();
+                const result = await window.app.sendMessage(message);
+
+                if (result.success) {
+                    await loadMessages();
+                } else {
+                    addMessage("assistant", `Error: ${result.message}`);
+                }
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = "Send";
+                messageInput.focus();
+            }
         });
+
 
         messageInput.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
@@ -265,6 +299,49 @@
         });
 
         loadMessages();
+
+        refreshModelsButton.addEventListener("click", async () => {
+            refreshModelsButton.disabled = true;
+            refreshModelsButton.textContent = "Refreshing...";
+
+            try {
+                const currentModelResult = await window.app.getAIModel();
+                const result = await window.app.refreshAIModels();
+
+                if (!result.success) {
+                    addMessage("assistant", `Error: ${result.message}`);
+                    return;
+                }
+
+                modelSelect.innerHTML = "";
+
+                result.models.forEach(model => {
+                    const option = document.createElement("option");
+
+                    option.value = model;
+                    option.textContent = model;
+
+                    modelSelect.appendChild(option);
+                });
+
+                if (result.models.length === 0) {
+                    addMessage("assistant", "No models are currently available.");
+                    return;
+                }
+
+                if (result.models.includes(currentModelResult.model)) {
+                    modelSelect.value = currentModelResult.model;
+                } else {
+                    modelSelect.value = result.models[0];
+
+                    await window.app.setAIModel(result.models[0]);
+                }
+
+            } finally {
+                refreshModelsButton.disabled = false;
+                refreshModelsButton.textContent = "Refresh Models";
+            }
+        });
     </script>
 </body>
 </html>

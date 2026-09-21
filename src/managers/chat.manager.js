@@ -17,6 +17,10 @@ class ChatManager {
     getMessages() {
         return this.messages;
     }
+
+    clearMessages() {
+        this.messages = [];
+    }
 }
 
 module.exports = ChatManager;
