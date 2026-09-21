@@ -121,6 +121,21 @@
     <div class="card">
         <h1>Chat</h1>
 
+        <div class="ai-controls">
+            <label>
+                Provider
+                <select id="provider-select">
+                    <option value="groq">Groq</option>
+                    <option value="gemini">Gemini</option>
+                </select>
+            </label>
+
+            <label>
+                Model
+                <select id="model-select"></select>
+            </label>
+        </div>
+
         <div id="messages"></div>
 
         <div class="input-row">
@@ -140,6 +155,71 @@
         const messageInput = document.getElementById("message-input");
         const sendButton = document.getElementById("send-message");
         const messagesContainer = document.getElementById("messages");
+
+        const providerSelect = document.getElementById("provider-select");
+        const modelSelect = document.getElementById("model-select");
+
+        async function loadAISettings() {
+            const providerResult = await window.app.getAIProvider();
+
+            providerSelect.value = providerResult.provider;
+
+            await loadModels();
+
+            const modelResult = await window.app.getAIModel();
+
+            modelSelect.value = modelResult.model;
+        }
+
+        async function loadModels() {
+            const result = await window.app.getAIModels();
+
+            modelSelect.innerHTML = "";
+
+            if (!result || !result.models) {
+                return;
+            }
+
+            result.models.forEach(model => {
+                const option = document.createElement("option");
+
+                option.value = model;
+                option.textContent = model;
+
+                modelSelect.appendChild(option);
+            });
+        }
+
+        providerSelect.addEventListener("change", async () => {
+            const provider = providerSelect.value;
+
+            const result = await window.app.setAIProvider(provider);
+
+            if (!result.success) {
+                console.error(result.message);
+                return;
+            }
+
+            await loadModels();
+
+            const modelResult = await window.app.getAIModel();
+
+            modelSelect.value = modelResult.model;
+        });
+
+        modelSelect.addEventListener("change", async () => {
+            const model = modelSelect.value;
+
+            const result = await window.app.setAIModel(model);
+
+            if (!result.success) {
+                console.error(result.message);
+            }
+        });
+
+        loadAISettings();
+
+    
 
         function renderMessages(messages) {
             messagesContainer.innerHTML = "";

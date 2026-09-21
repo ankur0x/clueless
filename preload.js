@@ -19,5 +19,21 @@ contextBridge.exposeInMainWorld("app", {
 
     getMessages: () => {
         return ipcRenderer.invoke("chat:get-messages");
-    }
+    },
+
+    setAIProvider: (provider) => {
+        return ipcRenderer.invoke("ai:set-provider", provider);
+    },
+
+    getAIProvider: () => {
+        return ipcRenderer.invoke("ai:get-provider");
+    },
+
+    setAIModel: (model) => {
+        return ipcRenderer.invoke("ai:set-model", model);
+    },
+
+    getAIModels: () => {
+        return ipcRenderer.invoke("ai:get-models");
+    },
 });

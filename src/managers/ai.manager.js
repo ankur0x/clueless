@@ -1,19 +1,51 @@
-const Groq = require("groq-sdk");
+const GroqProvider = require("../providers/groq.provider");
+const GeminiProvider = require("../providers/gemini.provider");
 
 class AIManager {
     constructor() {
-        this.client = new Groq({
-            apiKey: process.env.GROQ_API_KEY
-        });
+        this.providers = {
+            groq: new GroqProvider(),
+            gemini: new GeminiProvider()
+        };
+
+        this.currentProvider = "groq";
     }
 
-    async generateResponse(messages) {
-        const completion = await this.client.chat.completions.create({
-            model: "openai/gpt-oss-20b",
-            messages: messages
-        });
+    setProvider(providerName) {
+        if (!this.providers[providerName]) {
+            throw new Error(`Unknown AI provider: ${providerName}`);
+        }
 
-        return completion.choices[0].message.content;
+        this.currentProvider = providerName;
+    }
+
+    getProvider() {
+        return this.currentProvider;
+    }
+
+    setModel(modelName) {
+        const provider = this.providers[this.currentProvider];
+
+        provider.setModel(modelName);
+    }
+
+    getModel() {
+        const provider = this.providers[this.currentProvider];
+
+        return provider.getModel();
+    }
+
+    async getModels() {
+        const provider = this.providers[this.currentProvider];
+
+        return provider.getModels();
+    }
+    
+
+    async generateResponse(messages) {
+        const provider = this.providers[this.currentProvider];
+
+        return provider.generateResponse(messages);
     }
 }
 

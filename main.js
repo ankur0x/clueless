@@ -17,6 +17,16 @@ app.whenReady().then(() => {
     chatManager = new ChatManager();
     aiManager = new AIManager();
 
+    console.log("Current provider:", aiManager.getProvider());
+
+    aiManager.setProvider("gemini");
+
+    console.log("Switched provider:", aiManager.getProvider());
+
+    aiManager.setProvider("groq");
+
+    console.log("Switched back:", aiManager.getProvider());
+
     // MAIN WINDOW //
     windowManager.createMainWindow();
     
@@ -85,6 +95,60 @@ app.whenReady().then(() => {
     // GET MESSAGES //
     ipcMain.handle("chat:get-messages", async () => {
         return chatManager.getMessages();
+    });
+
+    ipcMain.handle("ai:set-provider", async (event, providerName) => {
+        try {
+            aiManager.setProvider(providerName);
+
+            return {
+                success: true,
+                provider: aiManager.getProvider()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    });
+
+    ipcMain.handle("ai:get-provider", async () => {
+        return {
+            provider: aiManager.getProvider()
+        };
+    });
+
+    ipcMain.handle("ai:get-model", async () => {
+        return {
+            model: aiManager.getModel()
+        };
+    });
+
+    ipcMain.handle("ai:set-model", async (event, modelName) => {
+        try {
+            aiManager.setModel(modelName);
+
+            return {
+                success: true,
+                model: aiManager.getModel()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    });
+
+    ipcMain.handle("ai:get-models", async () => {
+        const models = await aiManager.getModels();
+
+        console.log("Models from AIManager:", models);
+
+        return {
+            models: models
+        };
     });
 
 
