@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { app, ipcMain } = require("electron");
+const { app, ipcMain,globalShortcut } = require("electron");
 const WindowManager = require("./src/managers/window.manager");
 const SessionManager = require("./src/managers/session.manager");
 const ChatManager = require("./src/managers/chat.manager");
@@ -12,6 +12,14 @@ let chatManager;
 let aiManager;
 
 app.whenReady().then(() => {
+
+    if (app.dock) app.dock.hide(); // Hides macOS taskbar icon //
+
+    // SHORTCUT TO OPEN APP WHEN IT DOESN"T EVEN SHOWN ON TASKBAR //
+    globalShortcut.register("CommandOrControl+Shift+Space", () => {
+        windowManager.toggleChatWindow();
+    });
+
     windowManager = new WindowManager();
     sessionManager = new SessionManager();
     chatManager = new ChatManager();
