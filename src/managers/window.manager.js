@@ -48,6 +48,15 @@ class WindowManager {
             this.chatWindow.show();
         }
     }
+
+    sendToChatWindow(channel, ...args) {
+        if (
+            this.chatWindow &&
+            !this.chatWindow.isDestroyed()
+        ) {
+            this.chatWindow.webContents.send(channel, ...args);
+        }
+    }
 }
 
 module.exports = WindowManager;

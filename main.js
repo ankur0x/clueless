@@ -21,19 +21,40 @@ app.whenReady().then(() => {
     windowManager.createMainWindow();
     
     // START SESSION //
+    // ipcMain.handle("session:start", async () => {
+    //     console.log("Session start requested");
+
+    //     chatManager.clearMessages();
+    //     sessionManager.start();
+
+    //     // CHAT WINDOW //
+    //     windowManager.createChatWindow();
+
+    //     return {
+    //         success: true,
+    //         message: "Session started",
+    //         active: sessionManager.isActive()
+    //     };
+    // });
+
+    // START SESSION
     ipcMain.handle("session:start", async () => {
         console.log("Session start requested");
 
-        chatManager.clearMessages();
-        sessionManager.start();
+        const sessionId = sessionManager.start();
 
-        // CHAT WINDOW //
+        chatManager.startSession(sessionId);
+        console.log("Session started:", sessionId);
+
         windowManager.createChatWindow();
+
+        windowManager.sendToChatWindow("session:started");
 
         return {
             success: true,
             message: "Session started",
-            active: sessionManager.isActive()
+            active: sessionManager.isActive(),
+            sessionId
         };
     });
 
@@ -50,12 +71,11 @@ app.whenReady().then(() => {
         };
     });
 
-    // GET SESSION STATE //
+    // GET SESSION STATE
     ipcMain.handle("session:get-state", async () => {
-        console.log("Session state requested");
-
         return {
-            active: sessionManager.isActive()
+            active: sessionManager.isActive(),
+            sessionId: sessionManager.getSessionId()
         };
     });
 
@@ -71,10 +91,15 @@ app.whenReady().then(() => {
             chatManager.addMessage("user", message);
 
             const response = await aiManager.generateResponse(
-                chatManager.getMessages()
+                chatManager.getMessages(),
+                (chunk) => {
+                    event.sender.send("chat:response-chunk", chunk);
+                }
             );
 
             chatManager.addAssistantMessage(response);
+
+            event.sender.send("chat:response-complete");
 
             return {
                 success: true,
@@ -99,6 +124,9 @@ app.whenReady().then(() => {
                 userMessage =
                     "AI provider is experiencing a server error. Please try again.";
             }
+
+            event.sender.send("chat:response-error", userMessage);
+
 
             return {
                 success: false,
@@ -184,7 +212,7 @@ app.whenReady().then(() => {
         }
     });
 
-
+    
 });
 
 app.on("window-all-closed", () => {

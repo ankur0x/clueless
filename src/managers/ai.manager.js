@@ -103,10 +103,10 @@ class AIManager {
         return models;
     }
 
-    async generateResponse(messages) {
+    async generateResponse(messages, onChunk) {
         const provider = this.providers[this.currentProvider];
 
-        return provider.generateResponse(messages);
+        return provider.generateResponse(messages, onChunk);
     }
 }
 

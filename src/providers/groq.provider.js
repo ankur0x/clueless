@@ -25,13 +25,28 @@ class GroqProvider {
             .map(model => model.id);
     }
 
-    async generateResponse(messages) {
-        const completion = await this.client.chat.completions.create({
+    async generateResponse(messages, onChunk) {
+        const stream = await this.client.chat.completions.create({
             model: this.model,
-            messages: messages
+            messages,
+            stream: true
         });
 
-        return completion.choices[0].message.content;
+        let fullResponse = "";
+
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+
+            if (content) {
+                fullResponse += content;
+
+                if (onChunk) {
+                    onChunk(content);
+                }
+            }
+        }
+
+        return fullResponse;
     }
 
     

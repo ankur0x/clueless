@@ -1,9 +1,19 @@
 class ChatManager {
     constructor() {
         this.messages = [];
+        this.sessionId = null;
+    }
+
+    startSession(sessionId) {
+        this.sessionId = sessionId;
+        this.messages = [];
     }
 
     addMessage(role, content) {
+        if (!this.sessionId) {
+            throw new Error("No active chat session.");
+        }
+
         this.messages.push({
             role,
             content
@@ -20,6 +30,10 @@ class ChatManager {
 
     clearMessages() {
         this.messages = [];
+    }
+
+    getSessionId() {
+        return this.sessionId;
     }
 }
 

@@ -36,7 +36,7 @@ class GeminiProvider {
         return models;
     }
 
-    async generateResponse(messages) {
+    async generateResponse(messages, onChunk) {
         const contents = messages.map(message => ({
             role: message.role === "assistant" ? "model" : "user",
             parts: [
@@ -46,33 +46,26 @@ class GeminiProvider {
             ]
         }));
 
-        const maxRetries = 3;
+        const response = await this.client.models.generateContentStream({
+            model: this.model,
+            contents
+        });
 
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
-            try {
-                const response = await this.client.models.generateContent({
-                    model: this.model,
-                    contents
-                });
+        let fullResponse = "";
 
-                return response.text;
+        for await (const chunk of response) {
+            const text = chunk.text || "";
 
-            } catch (error) {
-                const status = error.status;
+            if (text) {
+                fullResponse += text;
 
-                if (status !== 503 || attempt === maxRetries) {
-                    throw error;
+                if (onChunk) {
+                    onChunk(text);
                 }
-
-                const delay = Math.pow(2, attempt) * 1000;
-
-                console.log(
-                    `Gemini unavailable. Retrying in ${delay / 1000}s...`
-                );
-
-                await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
+
+        return fullResponse;
     }
 }
 

@@ -40,4 +40,28 @@ contextBridge.exposeInMainWorld("app", {
     refreshAIModels: () => {
         return ipcRenderer.invoke("ai:refresh-models");
     },
+
+    onAIResponseChunk: (callback) => {
+        ipcRenderer.on("chat:response-chunk", (event, chunk) => {
+            callback(chunk);
+        });
+    },
+
+    onAIResponseComplete: (callback) => {
+        ipcRenderer.on("chat:response-complete", () => {
+            callback();
+        });
+    },
+
+    onAIResponseError: (callback) => {
+        ipcRenderer.on("chat:response-error", (event, error) => {
+            callback(error);
+        });
+    },
+
+    onSessionStarted: (callback) => {
+        ipcRenderer.on("session:started", () => {
+            callback();
+        });
+    },
 });

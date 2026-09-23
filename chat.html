@@ -114,6 +114,27 @@
 
         #send-message:hover { opacity: 0.9; }
         #send-message:active { transform: scale(0.97); }
+
+        .typing-indicator {
+            display: none;
+            font-size: 12px;
+            color: #c4b5fd;
+            margin-bottom: 12px;
+        }
+
+        #voice-button {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #voice-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -143,16 +164,20 @@
 
         <div id="messages"></div>
 
-        <div class="input-row">
+        <div id="typing-indicator" class="typing-indicator">
+            AI is thinking...
+        </div>
+
+        <div class="input-container">
             <input
                 id="message-input"
                 type="text"
                 placeholder="Type a message..."
             />
 
-            <button id="send-message">
-                Send
-            </button>
+            <button id="voice-button">🎙️</button>
+
+            <button id="send-button">Send</button>
         </div>
     </div>
 
@@ -166,6 +191,84 @@
 
         const refreshModelsButton = document.getElementById("refresh-models");
 
+        const typingIndicator = document.getElementById("typing-indicator");
+
+        const voiceButton = document.getElementById("voice-button");
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        voiceButton.addEventListener("click", async () => {
+            if (isRecording) {
+                stopRecording();
+                return;
+            }
+
+            await startRecording();
+        });
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+                audioChunks = [];
+
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(track => track.stop());
+
+                    const audioBlob = new Blob(audioChunks, {
+                        type: mediaRecorder.mimeType
+                    });
+
+                    console.log("🎙️ Recording complete:", audioBlob.size);
+
+                    await transcribeRecording(audioBlob);
+                };
+
+                mediaRecorder.start();
+
+                isRecording = true;
+
+                voiceButton.textContent = "🔴";
+                voiceButton.title = "Stop recording";
+
+                console.log("🎙️ Recording started");
+
+            } catch (error) {
+                console.error("🎙️ Microphone error:", error);
+            }
+        }
+
+        function stopRecording() {
+            if (!mediaRecorder || !isRecording) {
+                return;
+            }
+
+            mediaRecorder.stop();
+
+            isRecording = false;
+
+            voiceButton.textContent = "🎙️";
+            voiceButton.title = "Voice input";
+
+            console.log("🎙️ Stopping recording...");
+        }
+        async function transcribeRecording(audioBlob) {
+            console.log("🎙️ Audio blob:", audioBlob);
+            console.log("🎙️ MIME type:", audioBlob.type);
+        }
+        
         async function loadAISettings() {
             const providerResult = await window.app.getAIProvider();
 
@@ -197,6 +300,7 @@
             });
         }
 
+
         providerSelect.addEventListener("change", async () => {
             const provider = providerSelect.value;
 
@@ -224,7 +328,22 @@
 
         loadAISettings();
 
+        async function updateSessionUI() {
+            const result = await window.app.getSessionState();
+
+            const active = result.active;
+
+            sendButton.disabled = !active;
+            messageInput.disabled = !active;
+
+            if (!active) {
+                messageInput.placeholder = "Start a session first...";
+            } else {
+                messageInput.placeholder = "Type a message...";
+            }
+        }
     
+        updateSessionUI();
 
         function renderMessages(messages) {
             messagesContainer.innerHTML = "";
@@ -269,24 +388,29 @@
             if (!message) {
                 return;
             }
+            
+            setGeneratingState(true);
 
-            sendButton.disabled = true;
-            sendButton.textContent = "Sending...";
+
+            addMessage("user", message);
+            messageInput.value = "";
 
             try {
-                addMessage("user", message);
-                messageInput.value = "";
 
                 const result = await window.app.sendMessage(message);
 
-                if (result.success) {
-                    await loadMessages();
-                } else {
+                if (!result.success) {
                     addMessage("assistant", `Error: ${result.message}`);
                 }
+            } catch (error) {
+                console.error("Send message error:", error);
+
+                addMessage(
+                    "assistant",
+                    "Something went wrong. Please try again."
+                );
             } finally {
-                sendButton.disabled = false;
-                sendButton.textContent = "Send";
+                setGeneratingState(false);
                 messageInput.focus();
             }
         });
@@ -341,6 +465,55 @@
                 refreshModelsButton.disabled = false;
                 refreshModelsButton.textContent = "Refresh Models";
             }
+        });
+
+        function setGeneratingState(isGenerating) {
+            sendButton.disabled = isGenerating;
+            messageInput.disabled = isGenerating;
+
+            typingIndicator.style.display =
+                isGenerating ? "block" : "none";
+
+            sendButton.textContent =
+                isGenerating ? "Generating..." : "Send";
+        }
+
+        let streamingMessage = null;
+
+        window.app.onAIResponseChunk((chunk) => {
+            if (!streamingMessage) {
+                streamingMessage = document.createElement("div");
+
+                streamingMessage.classList.add(
+                    "message",
+                    "assistant"
+                );
+
+                messagesContainer.appendChild(streamingMessage);
+            }
+
+            streamingMessage.textContent += chunk;
+
+            messagesContainer.scrollTop =
+                messagesContainer.scrollHeight;
+        });
+
+        window.app.onAIResponseComplete(() => {
+            streamingMessage = null;
+        });
+
+        window.app.onAIResponseError((error) => {
+            if (streamingMessage) {
+                streamingMessage.textContent = `Error: ${error}`;
+                streamingMessage = null;
+            } else {
+                addMessage("assistant", `Error: ${error}`);
+            }
+        });
+
+        window.app.onSessionStarted(() => {
+            messagesContainer.innerHTML = "";
+            streamingMessage = null;
         });
     </script>
 </body>
