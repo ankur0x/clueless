@@ -64,4 +64,12 @@ contextBridge.exposeInMainWorld("app", {
             callback();
         });
     },
+
+    transcribeAudio: (audioData, mimeType) => {
+        return ipcRenderer.invoke("audio:transcribe", {
+            audioData,
+            mimeType
+        });
+    },
+
 });

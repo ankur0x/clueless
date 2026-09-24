@@ -183,7 +183,7 @@
 
     <script>
         const messageInput = document.getElementById("message-input");
-        const sendButton = document.getElementById("send-message");
+        const sendButton = document.getElementById("send-button");
         const messagesContainer = document.getElementById("messages");
 
         const providerSelect = document.getElementById("provider-select");
@@ -265,8 +265,27 @@
             console.log("🎙️ Stopping recording...");
         }
         async function transcribeRecording(audioBlob) {
-            console.log("🎙️ Audio blob:", audioBlob);
-            console.log("🎙️ MIME type:", audioBlob.type);
+            try {
+                const arrayBuffer = await audioBlob.arrayBuffer();
+
+                const result = await window.app.transcribeAudio(
+                    arrayBuffer,
+                    audioBlob.type
+                );
+
+                console.log("🎙️ MIME type:", audioBlob.type);
+
+                console.log("🎙️ Transcription result:", result);
+
+                if (result.success) {
+                    messageInput.value = result.text;
+                } else {
+                    console.error("🎙️ Transcription failed:", result.message);
+                }
+
+            } catch (error) {
+                console.error("🎙️ Transcription request failed:", error);
+            }
         }
         
         async function loadAISettings() {

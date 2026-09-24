@@ -5,6 +5,7 @@ const WindowManager = require("./src/managers/window.manager");
 const SessionManager = require("./src/managers/session.manager");
 const ChatManager = require("./src/managers/chat.manager");
 const AIManager = require("./src/managers/ai.manager");
+const SpeechManager = require("./src/managers/speech.manager");
 
 let windowManager;
 let sessionManager;
@@ -16,6 +17,19 @@ app.whenReady().then(() => {
     sessionManager = new SessionManager();
     chatManager = new ChatManager();
     aiManager = new AIManager();
+    speechManager = new SpeechManager();
+
+    console.log(
+        "Speech provider:",
+        speechManager.getProvider()
+    );
+
+    speechManager.setProvider("azure");
+
+    console.log(
+        "Speech provider:",
+        speechManager.getProvider()
+    );
 
     // MAIN WINDOW //
     windowManager.createMainWindow();
@@ -212,7 +226,39 @@ app.whenReady().then(() => {
         }
     });
 
-    
+    ipcMain.handle("audio:transcribe", async (event, { audioData, mimeType }) => {
+        try {
+            const audioBuffer = Buffer.from(audioData);
+
+            console.log(
+                "🎙️ Transcribing",
+                audioBuffer.length,
+                mimeType
+            );
+
+            const text = await speechManager.transcribe(
+                audioBuffer,
+                mimeType
+            );
+
+            console.log("🎙️ Transcript:", text);
+
+            return {
+                success: true,
+                text
+            };
+
+        } catch (error) {
+            console.error("🎙️ Transcription error:", error);
+
+            return {
+                success: false,
+                message: "Speech transcription failed. Please try again."
+            };
+        }
+    });
+
+        
 });
 
 app.on("window-all-closed", () => {
