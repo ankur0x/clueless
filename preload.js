@@ -72,4 +72,24 @@ contextBridge.exposeInMainWorld("app", {
         });
     },
 
+    setSpeechProvider: (provider) => {
+        return ipcRenderer.invoke("speech:set-provider", provider);
+    },
+
+    getSpeechProvider: () => {
+        return ipcRenderer.invoke("speech:get-provider");
+    },
+
+    setSpeechModel: (model) => {
+        return ipcRenderer.invoke("speech:set-model", model);
+    },
+
+    getSpeechModel: () => {
+        return ipcRenderer.invoke("speech:get-model");
+    },
+
+    getSpeechModels: () => {
+        return ipcRenderer.invoke("speech:get-models");
+    },
+
 });

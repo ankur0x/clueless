@@ -24,7 +24,7 @@ app.whenReady().then(() => {
         speechManager.getProvider()
     );
 
-    speechManager.setProvider("azure");
+    // speechManager.setProvider("azure");
 
     console.log(
         "Speech provider:",
@@ -201,7 +201,7 @@ app.whenReady().then(() => {
     ipcMain.handle("ai:get-models", async () => {
         const models = await aiManager.getModels();
 
-        console.log("Models from AIManager:", models);
+        // console.log("Models from AIManager:", models);
 
         return {
             models: models
@@ -256,6 +256,64 @@ app.whenReady().then(() => {
                 message: "Speech transcription failed. Please try again."
             };
         }
+    });
+
+    ipcMain.handle("speech:get-provider", () => {
+    return {
+        provider: speechManager.getProvider()
+    };
+});
+
+    ipcMain.handle("speech:set-provider", (event, provider) => {
+        try {
+            const result =
+                speechManager.setProvider(provider);
+
+            return {
+                success: true,
+                provider: result.provider,
+                model: result.model
+            };
+
+        } catch (error) {
+            console.error(
+                "Speech provider error:",
+                error
+            );
+
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    });
+
+    ipcMain.handle("speech:get-model", () => {
+        return {
+            model: speechManager.getModel()
+        };
+    });
+
+    ipcMain.handle("speech:set-model", (event, model) => {
+        try {
+            speechManager.setModel(model);
+
+            return {
+                success: true,
+                model: speechManager.getModel()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    });
+
+    ipcMain.handle("speech:get-models", () => {
+        return {
+            models: speechManager.getModels()
+        };
     });
 
         

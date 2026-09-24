@@ -21,6 +21,11 @@ class SpeechManager {
         }
 
         this.currentProvider = providerName;
+
+        return {
+            provider: this.currentProvider,
+            model: this.getModel()
+        };
     }
 
     getProvider() {

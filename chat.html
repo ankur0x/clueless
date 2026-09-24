@@ -8,133 +8,277 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 45%, #7e22ce 100%);
-            color: #f5f3ff;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 75%, #533483 100%);
+            color: #ffffff;
         }
 
+        /* ── Main floating panel ── */
         .card {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 40px;
-            width: 380px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            background: rgba(28, 28, 35, 0.72);
+            backdrop-filter: blur(28px) saturate(160%);
+            -webkit-backdrop-filter: blur(28px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 18px;
+            padding: 20px 18px 18px;
+            width: 400px;
+            box-shadow:
+                0 2px 0 rgba(255,255,255,0.06) inset,
+                0 24px 64px rgba(0, 0, 0, 0.55),
+                0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
+        /* ── Title ── */
         h1 {
-            font-size: 22px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 20px;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.01em;
             text-align: center;
+            color: rgba(255,255,255,0.92);
+            margin-bottom: 16px;
         }
 
+        /* ── Section divider label ── */
+        .section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin: 14px 0 6px;
+        }
+
+        /* ── Control rows (provider / speech) ── */
+        .ai-controls,
+        .speech-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .ai-controls label,
+        .speech-controls label {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.45);
+            flex: 1;
+            min-width: 100px;
+        }
+
+        select {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.85);
+            font-size: 12px;
+            font-family: inherit;
+            padding: 6px 10px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 26px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        
+        select option {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        select option:checked {
+            background: #ffffff;
+            color: #000000;
+        }
+        
+        select:hover, select:focus {
+            border-color: rgba(255,255,255,0.25);
+            background-color: rgba(255,255,255,0.11);
+        }
+
+        /* ── Refresh Models button ── */
+        #refresh-models {
+            flex-shrink: 0;
+            align-self: flex-end;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.75);
+            font-size: 11px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        #refresh-models:hover {
+            background: rgba(255,255,255,0.13);
+            border-color: rgba(255,255,255,0.28);
+            color: #fff;
+        }
+
+        #refresh-models:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ── Separator ── */
+        .sep {
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 14px 0;
+        }
+
+        /* ── Messages ── */
         #messages {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 320px;
+            gap: 8px;
+            max-height: 280px;
             overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 4px;
+            margin-bottom: 10px;
+            padding-right: 2px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
         }
+
+        #messages::-webkit-scrollbar { width: 4px; }
+        #messages::-webkit-scrollbar-track { background: transparent; }
+        #messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
 
         #messages:empty::before {
             content: "No messages yet";
             display: block;
             text-align: center;
-            font-size: 13px;
-            color: #c4b5fd;
-            padding: 12px 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.28);
+            padding: 20px 0;
         }
 
         .message {
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 70%;
-            font-size: 14px;
-            line-height: 1.4;
+            padding: 9px 13px;
+            border-radius: 12px;
+            max-width: 75%;
+            font-size: 13.5px;
+            line-height: 1.45;
             word-wrap: break-word;
         }
 
+        /* User bubble — blue pill */
         .user {
             align-self: flex-end;
-            background: rgba(167, 139, 250, 0.18);
-            border: 1px solid rgba(167, 139, 250, 0.3);
+            background: linear-gradient(135deg, #4f8ef7 0%, #2563eb 100%);
+            color: #fff;
+            border-radius: 16px 16px 4px 16px;
+            box-shadow: 0 2px 12px rgba(59, 130, 246, 0.35);
         }
 
+        /* Assistant bubble — dark glass */
         .assistant {
             align-self: flex-start;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.88);
+            border-radius: 16px 16px 16px 4px;
         }
 
-        .input-row {
+        /* ── Typing indicator ── */
+        .typing-indicator {
+            display: none;
+            font-size: 11.5px;
+            color: rgba(255,255,255,0.38);
+            margin-bottom: 8px;
+            padding-left: 2px;
+            font-style: italic;
+        }
+
+        /* ── Input row ── */
+        .input-container {
             display: flex;
-            gap: 8px;
+            gap: 7px;
+            align-items: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.11);
+            border-radius: 12px;
+            padding: 6px 6px 6px 12px;
+            transition: border-color 0.15s;
+        }
+
+        .input-container:focus-within {
+            border-color: rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.09);
         }
 
         #message-input {
             flex: 1;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.07);
-            color: #f5f3ff;
-            font-size: 14px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.9);
+            font-size: 13.5px;
+            font-family: inherit;
             outline: none;
+            min-width: 0;
         }
 
         #message-input::placeholder {
-            color: #c4b5fd;
+            color: rgba(255,255,255,0.28);
+            font-style: italic;
         }
 
-        #message-input:focus {
-            border-color: #a78bfa;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        #send-message {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #a78bfa, #7c3aed);
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: transform 0.15s ease, opacity 0.15s ease;
-        }
-
-        #send-message:hover { opacity: 0.9; }
-        #send-message:active { transform: scale(0.97); }
-
-        .typing-indicator {
-            display: none;
-            font-size: 12px;
-            color: #c4b5fd;
-            margin-bottom: 12px;
-        }
-
+        /* Voice button */
         #voice-button {
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 32px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 15px;
+            background: rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            flex-shrink: 0;
         }
 
-        #voice-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        #voice-button:hover { background: rgba(255,255,255,0.13); }
+        #voice-button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* Send button — pill */
+        #send-button {
+            flex-shrink: 0;
+            padding: 7px 16px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #4f8ef7, #2563eb);
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.4);
         }
+
+        #send-button:hover { opacity: 0.88; }
+        #send-button:active { transform: scale(0.96); }
+        #send-button:disabled { opacity: 0.38; cursor: not-allowed; }
     </style>
 </head>
 
@@ -149,7 +293,6 @@
                     <option value="groq">Groq</option>
                     <option value="gemini">Gemini</option>
                 </select>
-
             </label>
 
             <label>
@@ -157,22 +300,39 @@
                 <select id="model-select"></select>
             </label>
 
-            <button id="refresh-models">
-                    Refresh Models
-            </button>
+            <button id="refresh-models">Refresh Models</button>
         </div>
+
+        <div class="sep"></div>
+
+        <div class="speech-controls">
+            <label>
+                Speech Provider
+                <select id="speech-provider-select">
+                    <option value="groq">Groq</option>
+                    <option value="azure">Azure</option>
+                </select>
+            </label>
+
+            <label>
+                Speech Model
+                <select id="speech-model-select"></select>
+            </label>
+        </div>
+
+        <div class="sep"></div>
 
         <div id="messages"></div>
 
         <div id="typing-indicator" class="typing-indicator">
-            AI is thinking...
+            AI is thinking…
         </div>
 
         <div class="input-container">
             <input
                 id="message-input"
                 type="text"
-                placeholder="Type a message..."
+                placeholder="Ask anything…"
             />
 
             <button id="voice-button">🎙️</button>
@@ -195,6 +355,9 @@
 
         const voiceButton = document.getElementById("voice-button");
 
+        const speechProviderSelect = document.getElementById("speech-provider-select");
+        const speechModelSelect = document.getElementById("speech-model-select");
+
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
@@ -204,241 +367,148 @@
                 stopRecording();
                 return;
             }
-
             await startRecording();
         });
 
         async function startRecording() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true
-                });
-
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
-
                 mediaRecorder = new MediaRecorder(stream);
-
                 mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
+                    if (event.data.size > 0) audioChunks.push(event.data);
                 };
-
                 mediaRecorder.onstop = async () => {
                     stream.getTracks().forEach(track => track.stop());
-
-                    const audioBlob = new Blob(audioChunks, {
-                        type: mediaRecorder.mimeType
-                    });
-
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                     console.log("🎙️ Recording complete:", audioBlob.size);
-
                     await transcribeRecording(audioBlob);
                 };
-
                 mediaRecorder.start();
-
                 isRecording = true;
-
                 voiceButton.textContent = "🔴";
                 voiceButton.title = "Stop recording";
-
                 console.log("🎙️ Recording started");
-
             } catch (error) {
                 console.error("🎙️ Microphone error:", error);
             }
         }
 
         function stopRecording() {
-            if (!mediaRecorder || !isRecording) {
-                return;
-            }
-
+            if (!mediaRecorder || !isRecording) return;
             mediaRecorder.stop();
-
             isRecording = false;
-
             voiceButton.textContent = "🎙️";
             voiceButton.title = "Voice input";
-
             console.log("🎙️ Stopping recording...");
         }
+
         async function transcribeRecording(audioBlob) {
             try {
                 const arrayBuffer = await audioBlob.arrayBuffer();
-
-                const result = await window.app.transcribeAudio(
-                    arrayBuffer,
-                    audioBlob.type
-                );
-
+                const result = await window.app.transcribeAudio(arrayBuffer, audioBlob.type);
                 console.log("🎙️ MIME type:", audioBlob.type);
-
                 console.log("🎙️ Transcription result:", result);
-
                 if (result.success) {
                     messageInput.value = result.text;
                 } else {
                     console.error("🎙️ Transcription failed:", result.message);
                 }
-
             } catch (error) {
                 console.error("🎙️ Transcription request failed:", error);
             }
         }
-        
+
         async function loadAISettings() {
             const providerResult = await window.app.getAIProvider();
-
             providerSelect.value = providerResult.provider;
-
             await loadModels();
-
             const modelResult = await window.app.getAIModel();
-
             modelSelect.value = modelResult.model;
         }
 
         async function loadModels() {
             const result = await window.app.getAIModels();
-
             modelSelect.innerHTML = "";
-
-            if (!result || !result.models) {
-                return;
-            }
-
+            if (!result || !result.models) return;
             result.models.forEach(model => {
                 const option = document.createElement("option");
-
                 option.value = model;
                 option.textContent = model;
-
                 modelSelect.appendChild(option);
             });
         }
 
-
         providerSelect.addEventListener("change", async () => {
             const provider = providerSelect.value;
-
             const result = await window.app.setAIProvider(provider);
-
-            if (!result.success) {
-                console.error(result.message);
-                return;
-            }
-
+            if (!result.success) { console.error(result.message); return; }
             await loadModels();
-
             modelSelect.value = result.model;
         });
 
         modelSelect.addEventListener("change", async () => {
             const model = modelSelect.value;
-
             const result = await window.app.setAIModel(model);
-
-            if (!result.success) {
-                console.error(result.message);
-            }
+            if (!result.success) console.error(result.message);
         });
 
         loadAISettings();
 
         async function updateSessionUI() {
             const result = await window.app.getSessionState();
-
             const active = result.active;
-
             sendButton.disabled = !active;
             messageInput.disabled = !active;
-
-            if (!active) {
-                messageInput.placeholder = "Start a session first...";
-            } else {
-                messageInput.placeholder = "Type a message...";
-            }
+            messageInput.placeholder = active ? "Ask anything…" : "Start a session first...";
         }
-    
+
         updateSessionUI();
 
         function renderMessages(messages) {
             messagesContainer.innerHTML = "";
-
             messages.forEach((message) => {
                 const messageElement = document.createElement("div");
-
-                messageElement.classList.add("message");
-                messageElement.classList.add(message.role);
-
+                messageElement.classList.add("message", message.role);
                 messageElement.textContent = message.content;
-
                 messagesContainer.appendChild(messageElement);
-
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
 
-
         function addMessage(role, content) {
             const messageElement = document.createElement("div");
-
-            messageElement.classList.add("message");
-            messageElement.classList.add(role);
-
+            messageElement.classList.add("message", role);
             messageElement.textContent = content;
-
             messagesContainer.appendChild(messageElement);
-
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         async function loadMessages() {
             const messages = await window.app.getMessages();
-
             renderMessages(messages);
         }
 
         sendButton.addEventListener("click", async () => {
             const message = messageInput.value.trim();
-
-            if (!message) {
-                return;
-            }
-            
+            if (!message) return;
             setGeneratingState(true);
-
-
             addMessage("user", message);
             messageInput.value = "";
-
             try {
-
                 const result = await window.app.sendMessage(message);
-
-                if (!result.success) {
-                    addMessage("assistant", `Error: ${result.message}`);
-                }
+                if (!result.success) addMessage("assistant", `Error: ${result.message}`);
             } catch (error) {
                 console.error("Send message error:", error);
-
-                addMessage(
-                    "assistant",
-                    "Something went wrong. Please try again."
-                );
+                addMessage("assistant", "Something went wrong. Please try again.");
             } finally {
                 setGeneratingState(false);
                 messageInput.focus();
             }
         });
 
-
         messageInput.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                sendButton.click();
-            }
+            if (event.key === "Enter") sendButton.click();
         });
 
         loadMessages();
@@ -446,40 +516,24 @@
         refreshModelsButton.addEventListener("click", async () => {
             refreshModelsButton.disabled = true;
             refreshModelsButton.textContent = "Refreshing...";
-
             try {
                 const currentModelResult = await window.app.getAIModel();
                 const result = await window.app.refreshAIModels();
-
-                if (!result.success) {
-                    addMessage("assistant", `Error: ${result.message}`);
-                    return;
-                }
-
+                if (!result.success) { addMessage("assistant", `Error: ${result.message}`); return; }
                 modelSelect.innerHTML = "";
-
                 result.models.forEach(model => {
                     const option = document.createElement("option");
-
                     option.value = model;
                     option.textContent = model;
-
                     modelSelect.appendChild(option);
                 });
-
-                if (result.models.length === 0) {
-                    addMessage("assistant", "No models are currently available.");
-                    return;
-                }
-
+                if (result.models.length === 0) { addMessage("assistant", "No models are currently available."); return; }
                 if (result.models.includes(currentModelResult.model)) {
                     modelSelect.value = currentModelResult.model;
                 } else {
                     modelSelect.value = result.models[0];
-
                     await window.app.setAIModel(result.models[0]);
                 }
-
             } finally {
                 refreshModelsButton.disabled = false;
                 refreshModelsButton.textContent = "Refresh Models";
@@ -489,12 +543,8 @@
         function setGeneratingState(isGenerating) {
             sendButton.disabled = isGenerating;
             messageInput.disabled = isGenerating;
-
-            typingIndicator.style.display =
-                isGenerating ? "block" : "none";
-
-            sendButton.textContent =
-                isGenerating ? "Generating..." : "Send";
+            typingIndicator.style.display = isGenerating ? "block" : "none";
+            sendButton.textContent = isGenerating ? "Generating..." : "Send";
         }
 
         let streamingMessage = null;
@@ -502,24 +552,14 @@
         window.app.onAIResponseChunk((chunk) => {
             if (!streamingMessage) {
                 streamingMessage = document.createElement("div");
-
-                streamingMessage.classList.add(
-                    "message",
-                    "assistant"
-                );
-
+                streamingMessage.classList.add("message", "assistant");
                 messagesContainer.appendChild(streamingMessage);
             }
-
             streamingMessage.textContent += chunk;
-
-            messagesContainer.scrollTop =
-                messagesContainer.scrollHeight;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
 
-        window.app.onAIResponseComplete(() => {
-            streamingMessage = null;
-        });
+        window.app.onAIResponseComplete(() => { streamingMessage = null; });
 
         window.app.onAIResponseError((error) => {
             if (streamingMessage) {
@@ -534,6 +574,45 @@
             messagesContainer.innerHTML = "";
             streamingMessage = null;
         });
+
+        speechProviderSelect.addEventListener("change", async () => {
+            const provider = speechProviderSelect.value;
+            console.log("🎙️ Switching speech provider:", provider);
+            const result = await window.app.setSpeechProvider(provider);
+            console.log("🎙️ Provider result:", result);
+            if (!result.success) { console.error(result.message); return; }
+            await loadSpeechModels();
+            speechModelSelect.value = result.model;
+        });
+
+        async function loadSpeechSettings() {
+            const providerResult = await window.app.getSpeechProvider();
+            speechProviderSelect.value = providerResult.provider;
+            await loadSpeechModels();
+            const modelResult = await window.app.getSpeechModel();
+            speechModelSelect.value = modelResult.model;
+        }
+
+        async function loadSpeechModels() {
+            const result = await window.app.getSpeechModels();
+            console.log("🎙️ Available speech models:", result);
+            speechModelSelect.innerHTML = "";
+            if (!result || !result.models) return;
+            result.models.forEach(model => {
+                const option = document.createElement("option");
+                option.value = model;
+                option.textContent = model;
+                speechModelSelect.appendChild(option);
+            });
+        }
+
+        speechModelSelect.addEventListener("change", async () => {
+            const model = speechModelSelect.value;
+            const result = await window.app.setSpeechModel(model);
+            if (!result.success) console.error(result.message);
+        });
+
+        loadSpeechSettings();
     </script>
 </body>
 </html>
